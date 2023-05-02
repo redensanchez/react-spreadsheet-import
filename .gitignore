@@ -9,3 +9,4 @@ dist-commonjs
 types
 coverage
 .DS_Store
+docs-build

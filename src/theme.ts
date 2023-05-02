@@ -336,6 +336,13 @@ export const themeOverrides = {
     },
     MatchIcon: MatchIconTheme,
     Steps: StepsTheme,
+    ContinueButton: {
+      baseStyle: {
+        button: {
+          mt: "1rem",
+        },
+      },
+    },
     Modal: {
       baseStyle: {
         dialog: {
