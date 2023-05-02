@@ -13,7 +13,7 @@ type DropZoneProps = {
 }
 
 export const DropZone = ({ onContinue, isLoading }: DropZoneProps) => {
-  const { translations, maxFileSize, dateFormat, parseRaw } = useRsi()
+  const { translations, maxFileSize, dateFormat, parseRaw, supportedFileTypes } = useRsi()
   const styles = useStyleConfig("UploadStep") as typeof themeOverrides["components"]["UploadStep"]["baseStyle"]
   const toast = useToast()
   const [loading, setLoading] = useState(false)
@@ -22,7 +22,7 @@ export const DropZone = ({ onContinue, isLoading }: DropZoneProps) => {
     noKeyboard: true,
     maxFiles: 1,
     maxSize: maxFileSize,
-    accept: ".xls, .csv, .xlsx",
+    accept: supportedFileTypes,
     onDropRejected: (fileRejections) => {
       setLoading(false)
       fileRejections.forEach((fileRejection) => {
@@ -48,7 +48,7 @@ export const DropZone = ({ onContinue, isLoading }: DropZoneProps) => {
   return (
     <Box
       {...getRootProps()}
-      {...getDropZoneBorder(styles.dropZoneBorder)}
+      {...getDropZoneBorder(styles.dropZoneBorder, styles.dropZoneBackgroundColor)}
       width="100%"
       display="flex"
       justifyContent="center"

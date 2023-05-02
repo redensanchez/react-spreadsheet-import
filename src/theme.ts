@@ -108,6 +108,7 @@ export const themeOverrides = {
           color: "textColor",
         },
         dropZoneBorder: "rsi.500",
+        dropZoneBackgroundColor: "rsi.500",
         dropzoneButton: {
           mt: "1rem",
         },

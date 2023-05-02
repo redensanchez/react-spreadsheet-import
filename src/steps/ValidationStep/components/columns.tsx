@@ -78,6 +78,24 @@ export const generateColumns = <T extends string>(fields: Fields<T>): Column<Dat
               />
             )
             break
+
+          case "date":
+            component = (
+              <Box paddingInlineStart="0.5rem">
+                <Input
+                  ref={autoFocusAndSelect}
+                  variant="unstyled"
+                  autoFocus
+                  size="small"
+                  value={row[column.key] as string}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    onRowChange({ ...row, [column.key]: event.target.value })
+                  }}
+                  onBlur={() => onClose(true)}
+                />
+              </Box>
+            )
+            break
           default:
             component = (
               <Box pl="0.5rem">

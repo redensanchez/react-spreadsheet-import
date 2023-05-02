@@ -1,6 +1,95 @@
-import type { Data, Fields, Info, RowHook, TableHook } from "../../../types"
+import type {
+  Data,
+  Fields,
+  Info,
+  RowHook,
+  TableHook,
+  Field,
+  UniqueValidation,
+  RequiredValidation,
+  RegexValidation,
+} from "../../../types"
 import type { Meta, Errors } from "../types"
 import { v4 } from "uuid"
+import { merge, noop } from "lodash"
+
+let ruleMap = {
+  unique: (data: (Data<any> & Partial<Meta>)[], field: Field<any>, validation: UniqueValidation) => {
+    const errors: Errors = {}
+    const values = data.map((entry) => entry[field.key as any])
+
+    const taken = new Set() // Set of items used at least once
+    const duplicates = new Set() // Set of items used multiple times
+
+    values.forEach((value) => {
+      if (validation.allowEmpty && !value) {
+        // If allowEmpty is set, we will not validate falsy fields such as undefined or empty string.
+        return
+      }
+
+      if (taken.has(value)) {
+        duplicates.add(value)
+      } else {
+        taken.add(value)
+      }
+    })
+
+    values.forEach((value, index) => {
+      if (duplicates.has(value)) {
+        errors[index] = {
+          ...errors[index],
+          [field.key]: {
+            level: validation.level || "error",
+            message: validation.errorMessage || "Field must be unique",
+          },
+        }
+      }
+    })
+
+    return errors
+  },
+  required: (data: (Data<any> & Partial<Meta>)[], field: Field<any>, validation: RequiredValidation) => {
+    const errors: Errors = {}
+
+    data.forEach((entry, index) => {
+      if (entry[field.key] === null || entry[field.key] === undefined || entry[field.key] === "") {
+        errors[index] = {
+          ...errors[index],
+          [field.key]: {
+            level: validation.level || "error",
+            message: validation.errorMessage || "Field is required",
+          },
+        }
+      }
+    })
+
+    return errors
+  },
+  regex: (data: (Data<any> & Partial<Meta>)[], field: Field<any>, validation: RegexValidation) => {
+    const errors: Errors = {}
+    const regex = new RegExp(validation.value, validation.flags)
+
+    data.forEach((entry, index) => {
+      const value = entry[field.key]?.toString() ?? ""
+      if (!value.match(regex)) {
+        errors[index] = {
+          ...errors[index],
+          [field.key]: {
+            level: validation.level || "error",
+            message:
+              validation.errorMessage || `Field did not match the regex /${validation.value}/${validation.flags} `,
+          },
+        }
+      }
+    })
+
+    return errors
+  },
+}
+
+export const extendRules = (rules: any[]) => {
+  ruleMap = merge(ruleMap, rules)
+}
 
 export const addErrorsAndRunHooks = <T extends string>(
   data: (Data<T> & Partial<Meta>)[],
@@ -8,7 +97,7 @@ export const addErrorsAndRunHooks = <T extends string>(
   rowHook?: RowHook<T>,
   tableHook?: TableHook<T>,
 ): (Data<T> & Meta)[] => {
-  const errors: Errors = {}
+  let errors: Errors = {}
 
   const addHookError = (rowIndex: number, fieldKey: T, error: Info) => {
     errors[rowIndex] = {
@@ -27,72 +116,11 @@ export const addErrorsAndRunHooks = <T extends string>(
 
   fields.forEach((field) => {
     field.validations?.forEach((validation) => {
-      switch (validation.rule) {
-        case "unique": {
-          const values = data.map((entry) => entry[field.key as T])
+      const validationFn = ruleMap[validation.rule] ?? noop
 
-          const taken = new Set() // Set of items used at least once
-          const duplicates = new Set() // Set of items used multiple times
-
-          values.forEach((value) => {
-            if (validation.allowEmpty && !value) {
-              // If allowEmpty is set, we will not validate falsy fields such as undefined or empty string.
-              return
-            }
-
-            if (taken.has(value)) {
-              duplicates.add(value)
-            } else {
-              taken.add(value)
-            }
-          })
-
-          values.forEach((value, index) => {
-            if (duplicates.has(value)) {
-              errors[index] = {
-                ...errors[index],
-                [field.key]: {
-                  level: validation.level || "error",
-                  message: validation.errorMessage || "Field must be unique",
-                },
-              }
-            }
-          })
-          break
-        }
-        case "required": {
-          data.forEach((entry, index) => {
-            if (entry[field.key as T] === null || entry[field.key as T] === undefined || entry[field.key as T] === "") {
-              errors[index] = {
-                ...errors[index],
-                [field.key]: {
-                  level: validation.level || "error",
-                  message: validation.errorMessage || "Field is required",
-                },
-              }
-            }
-          })
-          break
-        }
-        case "regex": {
-          const regex = new RegExp(validation.value, validation.flags)
-          data.forEach((entry, index) => {
-            const value = entry[field.key]?.toString() ?? ""
-            if (!value.match(regex)) {
-              errors[index] = {
-                ...errors[index],
-                [field.key]: {
-                  level: validation.level || "error",
-                  message:
-                    validation.errorMessage ||
-                    `Field did not match the regex /${validation.value}/${validation.flags} `,
-                },
-              }
-            }
-          })
-          break
-        }
-      }
+      // eslint-disable-next-line
+      // @ts-ignore
+      errors = merge(errors, validationFn(data, field, validation))
     })
   })
 

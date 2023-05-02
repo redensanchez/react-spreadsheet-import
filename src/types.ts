@@ -43,6 +43,10 @@ export type RsiProps<T extends string> = {
   dateFormat?: string
   // Sets SheetJS "raw" option. If true, parsing will only be applied to xlsx date fields.
   parseRaw?: boolean
+  // Use for right-to-left (RTL) support
+  rtl?: boolean
+
+  supportedFileTypes?: string
 }
 
 export type RawData = Array<string | undefined>
@@ -64,7 +68,7 @@ export type Field<T extends string> = {
   // Validations used for field entries
   validations?: Validation[]
   // Field entry component, default: Input
-  fieldType: Checkbox | Select | Input
+  fieldType: Checkbox | Select | Input | Date
   // UI-facing values shown to user as field examples pre-upload phase
   example?: string
 }
@@ -90,6 +94,10 @@ export type SelectOption = {
 
 export type Input = {
   type: "input"
+}
+
+export type Date = {
+  type: "date"
 }
 
 export type Validation = RequiredValidation | UniqueValidation | RegexValidation

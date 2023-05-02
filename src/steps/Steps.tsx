@@ -1,4 +1,4 @@
-import { UploadFlow } from "./UploadFlow"
+import { StepType, UploadFlow } from "./UploadFlow"
 import { ModalHeader } from "@chakra-ui/react"
 import { useSteps, Step, Steps as Stepper } from "chakra-ui-steps"
 import { CgCheck } from "react-icons/cg"
@@ -9,9 +9,16 @@ const CheckIcon = ({ color }: { color: string }) => <CgCheck size="2.25rem" colo
 const steps = ["uploadStep", "selectHeaderStep", "matchColumnsStep", "validationStep"] as const
 
 export const Steps = () => {
-  const { translations } = useRsi()
+  const { translations, initialStepState } = useRsi()
+  const stepTypeToNumericMap = {
+    [StepType.upload]: 0,
+    [StepType.selectSheet]: 0,
+    [StepType.selectHeader]: 1,
+    [StepType.matchColumns]: 2,
+    [StepType.validateData]: 3,
+  }
   const { nextStep, activeStep } = useSteps({
-    initialStep: 0,
+    initialStep: stepTypeToNumericMap[initialStepState?.type ?? StepType.upload],
   })
 
   return (
