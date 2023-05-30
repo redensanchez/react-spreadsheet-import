@@ -68,7 +68,7 @@ export type Field<T extends string> = {
   // Validations used for field entries
   validations?: Validation[]
   // Field entry component, default: Input
-  fieldType: Checkbox | Select | Input | Date
+  fieldType: Checkbox | Select | Input
   // UI-facing values shown to user as field examples pre-upload phase
   example?: string
 }
@@ -94,10 +94,6 @@ export type SelectOption = {
 
 export type Input = {
   type: "input"
-}
-
-export type Date = {
-  type: "date"
 }
 
 export type Validation = RequiredValidation | UniqueValidation | RegexValidation
