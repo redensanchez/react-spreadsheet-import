@@ -278,6 +278,9 @@ export const themeOverrides = {
           color: "textColor",
           fontSize: "3xl",
         },
+        deleteSelectedButton: {
+          color: "textColor",
+        },
         select: {
           dropdownIndicator: (provided) => ({
             ...provided,

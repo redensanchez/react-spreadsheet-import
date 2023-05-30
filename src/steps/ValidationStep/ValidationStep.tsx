@@ -116,7 +116,7 @@ export const ValidationStep = <T extends string>({ initialData }: Props<T>) => {
         <Box display="flex" justifyContent="space-between" alignItems="center" mb="2rem" flexWrap="wrap" gap="8px">
           <Heading sx={styles.heading}>{translations.validationStep.title}</Heading>
           <Box display="flex" gap="16px" alignItems="center" flexWrap="wrap">
-            <Button variant="outline" size="sm" onClick={deleteSelectedRows}>
+            <Button sx={styles.deleteSelectedButton} variant="outline" size="sm" onClick={deleteSelectedRows}>
               {translations.validationStep.discardButtonTitle}
             </Button>
             <Switch
