@@ -11,11 +11,13 @@ export const findMatch = <T extends string>(
   fields: Fields<T>,
   autoMapDistance: number,
 ): T | undefined => {
+  const calculateDistanceLowerCasedStrings = (k1: string, k2: string) => lavenstein(k1.toLowerCase(), k2.toLowerCase())
+
   const smallestValue = fields.reduce<AutoMatchAccumulator<T>>((acc, field) => {
     const distance = Math.min(
       ...[
-        lavenstein(field.key, header),
-        ...(field.alternateMatches?.map((alternate) => lavenstein(alternate, header)) || []),
+        calculateDistanceLowerCasedStrings(field.key, header),
+        ...(field.alternateMatches?.map((alternate) => calculateDistanceLowerCasedStrings(alternate, header)) || []),
       ],
     )
     return distance < acc.distance || acc.distance === undefined
